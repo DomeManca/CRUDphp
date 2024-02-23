@@ -36,7 +36,6 @@ $squadre = getSquadre();
 // Visualizzazione dei dati totali
 $allenatori = getAllenatori();
 
-
 // Aggiunta dati
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
     $nome = $_POST['nome'];
@@ -54,10 +53,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
     header('Location: dashboard.php');
     exit();
 }
-
 // Modifica dati
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit'])) {
-    $id = $_POST['giocatore_id'];
+    $giocatoreId = $_POST['giocatore_id'];
     $nome = $_POST['nome'];
     $cognome = $_POST['cognome'];
     $dataNascita = $_POST['data_nascita'];
@@ -67,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit'])) {
     $stmt->bindParam(':nome', $nome);
     $stmt->bindParam(':cognome', $cognome);
     $stmt->bindParam(':dataNascita', $dataNascita);
-    $stmt->bindParam(':id', $id);
+    $stmt->bindParam(':id', $giocatoreId);
     $stmt->execute();
     header('Location: dashboard.php');
     exit();
@@ -75,14 +73,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit'])) {
 
 // Cancellazione dei dati
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
-    $id = $_POST['giocatore_id'];
+    $giocatoreId = $_POST['giocatore_id'];
     $query = "DELETE FROM Giocatore WHERE ID = :id";
     $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':id', $id);
+    $stmt->bindParam(':id', $giocatoreId);
     $stmt->execute();
     header('Location: dashboard.php');
     exit();
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -112,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
         <!-- Visualizzazione con filtri -->
 <div class="card mb-4">
     <div class="card-header">
-        Filtra per squadra
+        Visualizza Giocatori-Squadra-Allenatore
     </div>
     <div class="card-body">
         <form method="POST">
@@ -131,15 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
             </div>
             <button type="submit" class="btn btn-primary">Applica filtro</button>
         </form>
-    </div>
-</div>
-
-<!-- Tabella dei giocatori filtrati -->
-<div class="card mb-4">
-    <div class="card-header">
-        Giocatori
-    </div>
-    <div class="card-body">
+        <br>
         <table class="table">
             <thead>
                 <tr>
@@ -152,8 +143,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                     <th>Allenatore Nome</th>
                     <th>Allenatore Cognome</th>
                     <th>Allenatore Data di Nascita</th>
-                    <th>Sponsor</th>
-                    <th>Contratto Cifra</th>
                 </tr>
             </thead>
             <tbody>
@@ -161,13 +150,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                 // Verifica se è stato inviato un filtro per squadra
                 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['squadra_id']) && $_POST['squadra_id'] != "") {
                     $squadra_id = $_POST['squadra_id'];
-                    $query = "SELECT Giocatore.Nome AS Giocatore_Nome, Giocatore.Cognome AS Giocatore_Cognome, Giocatore.Data_di_Nascita AS Giocatore_Data_di_Nascita, Squadra.Nome AS Squadra_Nome, Squadra.Anno_Nascita AS Squadra_Anno_Nascita,  Squadra.Citta AS Squadra_Citta, Allenatore.Nome AS Allenatore_Nome, Allenatore.Cognome AS Allenatore_Cognome,  Allenatore.Data_di_Nascita AS Allenatore_Data_di_Nascita, Sponsor.Nome AS Sponsor_Nome, Contratto.Cifra AS Contratto_Cifra FROM Giocatore LEFT JOIN Squadra ON Giocatore.Squadra_ID = Squadra.ID LEFT JOIN Allenatore ON Squadra.Allenatore = Allenatore.ID LEFT JOIN Contratto ON Squadra.ID = Contratto.Squadra_ID LEFT JOIN Sponsor ON Contratto.Sponsor_ID = Sponsor.ID WHERE Squadra.ID = :squadra_id";
+                    $query = "SELECT Giocatore.Nome AS Giocatore_Nome, Giocatore.Cognome AS Giocatore_Cognome, Giocatore.Data_di_Nascita AS Giocatore_Data_di_Nascita, Squadra.Nome AS Squadra_Nome, Squadra.Anno_Nascita AS Squadra_Anno_Nascita,  Squadra.Citta AS Squadra_Citta, Allenatore.Nome AS Allenatore_Nome, Allenatore.Cognome AS Allenatore_Cognome,  Allenatore.Data_di_Nascita AS Allenatore_Data_di_Nascita FROM Giocatore LEFT JOIN Squadra ON Giocatore.Squadra_ID = Squadra.ID LEFT JOIN Allenatore ON Squadra.Allenatore = Allenatore.ID LEFT JOIN Contratto ON Squadra.ID = Contratto.Squadra_ID LEFT JOIN Sponsor ON Contratto.Sponsor_ID = Sponsor.ID WHERE Squadra.ID = :squadra_id";
                     $stmt = $pdo->prepare($query);
                     $stmt->bindParam(':squadra_id', $squadra_id, PDO::PARAM_INT);
                     $stmt->execute();
                 } else {
                     // Nessun filtro, visualizza tutti i giocatori
-                    $stmt = $pdo->query("SELECT Giocatore.Nome AS Giocatore_Nome, Giocatore.Cognome AS Giocatore_Cognome, Giocatore.Data_di_Nascita AS Giocatore_Data_di_Nascita, Squadra.Nome AS Squadra_Nome, Squadra.Anno_Nascita AS Squadra_Anno_Nascita,  Squadra.Citta AS Squadra_Citta, Allenatore.Nome AS Allenatore_Nome, Allenatore.Cognome AS Allenatore_Cognome,  Allenatore.Data_di_Nascita AS Allenatore_Data_di_Nascita, Sponsor.Nome AS Sponsor_Nome, Contratto.Cifra AS Contratto_Cifra FROM Giocatore LEFT JOIN Squadra ON Giocatore.Squadra_ID = Squadra.ID LEFT JOIN Allenatore ON Squadra.Allenatore = Allenatore.ID LEFT JOIN Contratto ON Squadra.ID = Contratto.Squadra_ID LEFT JOIN Sponsor ON Contratto.Sponsor_ID = Sponsor.ID");
+                    $stmt = $pdo->query("SELECT Giocatore.Nome AS Giocatore_Nome, Giocatore.Cognome AS Giocatore_Cognome, Giocatore.Data_di_Nascita AS Giocatore_Data_di_Nascita, Squadra.Nome AS Squadra_Nome, Squadra.Anno_Nascita AS Squadra_Anno_Nascita,  Squadra.Citta AS Squadra_Citta, Allenatore.Nome AS Allenatore_Nome, Allenatore.Cognome AS Allenatore_Cognome,  Allenatore.Data_di_Nascita AS Allenatore_Data_di_Nascita FROM Giocatore LEFT JOIN Squadra ON Giocatore.Squadra_ID = Squadra.ID LEFT JOIN Allenatore ON Squadra.Allenatore = Allenatore.ID LEFT JOIN Contratto ON Squadra.ID = Contratto.Squadra_ID LEFT JOIN Sponsor ON Contratto.Sponsor_ID = Sponsor.ID");
                 }
 
                 // Loop attraverso i risultati e stampa le righe della tabella
@@ -182,8 +171,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                     echo "<td>" . $row['Allenatore_Nome'] . "</td>";
                     echo "<td>" . $row['Allenatore_Cognome'] . "</td>";
                     echo "<td>" . $row['Allenatore_Data_di_Nascita'] . "</td>";
-                    echo "<td>" . $row['Sponsor_Nome'] . "</td>";
-                    echo "<td>" . $row['Contratto_Cifra'] . "</td>";
                     echo "</tr>";
                 }
                 ?>
@@ -191,12 +178,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
         </table>
     </div>
 </div>
+ 
+<?php
+// Query per recuperare le informazioni su squadre e sponsor
+$query = "SELECT squadra.Nome AS Squadra_Nome, squadra.Citta AS Squadra_Citta, GROUP_CONCAT(sponsor.Nome SEPARATOR ', ') AS Sponsor_Nomi, SUM(contratto.Cifra) AS Cifra_Totale
+          FROM squadra
+          LEFT JOIN contratto ON squadra.ID = contratto.Squadra_ID
+          LEFT JOIN sponsor ON contratto.Sponsor_ID = sponsor.ID
+          GROUP BY squadra.ID";
+$stmt = $pdo->query($query);
+$squadre_sponsor = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
 
+<!-- Visualizzazione squadre e sponsor -->
+<div class="card mb-4">
+    <div class="card-header">
+        Squadre e Sponsor
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Squadra</th>
+                    <th>Città</th>
+                    <th>Sponsor</th>
+                    <th>Cifra Totale</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($squadre_sponsor as $row): ?>
+                    <tr>
+                        <td><?php echo $row['Squadra_Nome']; ?></td>
+                        <td><?php echo $row['Squadra_Citta']; ?></td>
+                        <td><?php echo $row['Sponsor_Nomi']; ?></td>
+                        <td><?php echo $row['Cifra_Totale']; ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-
-
-
-        
         <!-- Aggiunta dati -->
         <div class="card mb-4">
             <div class="card-header">
@@ -228,56 +250,64 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                 </form>
             </div>
         </div>
-        
-        <!-- Modifica dati -->
-        <div class="card mb-4">
-            <div class="card-header">
-                Modifica giocatore
+
+        <?php
+// Query per recuperare i giocatori
+$query = "SELECT ID, CONCAT(Nome, ' ', Cognome) AS NomeCompleto FROM Giocatore";
+$stmt = $pdo->query($query);
+$giocatori = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+<!-- Modifica dati -->
+<div class="card mb-4">
+    <div class="card-header">
+        Modifica giocatore
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="form-group">
+                <select class="form-control" name="giocatore_id" required>
+                    <?php foreach ($giocatori as $giocatore): ?>
+                        <option value="<?php echo $giocatore['ID']; ?>"><?php echo $giocatore['NomeCompleto']; ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-            <div class="card-body">
-                <form method="POST">
-                    <div class="form-group">
-                        <select class="form-control" name="giocatore_id" required>
-                            <?php foreach ($giocatori as $giocatore): ?>
-                                <option value="<?php echo $giocatore['ID']; ?>"><?php echo $giocatore['Nome'] . ' ' . $giocatore['Cognome']; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="nome">Nome:</label>
-                        <input type="text" class="form-control" name="nome" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cognome">Cognome:</label>
-                        <input type="text" class="form-control" name="cognome" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="data_nascita">Data di nascita:</label>
-                        <input type="date" class="form-control" name="data_nascita" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary" name="edit">Modifica</button>
-                </form>
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" class="form-control" name="nome" required>
             </div>
-        </div>
-        
-        <!-- Cancellazione dati -->
-        <div class="card">
-            <div class="card-header">
-                Cancella giocatore
+            <div class="form-group">
+                <label for="cognome">Cognome:</label>
+                <input type="text" class="form-control" name="cognome" required>
             </div>
-            <div class="card-body">
-                <form method="POST">
-                    <div class="form-group">
-                        <select class="form-control" name="giocatore_id" required>
-                            <?php foreach ($giocatori as $giocatore): ?>
-                                <option value="<?php echo $giocatore['ID']; ?>"><?php echo $giocatore['Nome'] . ' ' . $giocatore['Cognome']; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-danger" name="delete">Cancella</button>
-                </form>
+            <div class="form-group">
+                <label for="data_nascita">Data di nascita:</label>
+                <input type="date" class="form-control" name="data_nascita" required>
             </div>
-        </div>
+            <button type="submit" class="btn btn-primary" name="edit">Modifica</button>
+        </form>
+    </div>
+</div>
+
+<!-- Cancellazione dati -->
+<div class="card">
+    <div class="card-header">
+        Cancella giocatore
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="form-group">
+                <select class="form-control" name="giocatore_id" required>
+                    <?php foreach ($giocatori as $giocatore): ?>
+                        <option value="<?php echo $giocatore['ID']; ?>"><?php echo $giocatore['NomeCompleto']; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-danger" name="delete">Cancella</button>
+        </form>
+    </div>
+</div>
+
         
         <p><a href="logout.php">Logout</a></p>
     </div>
