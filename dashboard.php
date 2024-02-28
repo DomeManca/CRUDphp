@@ -4,7 +4,7 @@ include_once 'config.php';
 
 // Verifica se l'utente è autenticato
 if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
+    header('Location: index.php');
     exit();
 }
 
