@@ -180,20 +180,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 </div>
  
 <?php
-// Query per recuperare le informazioni su squadre e sponsor
-$query = "SELECT squadra.Nome AS Squadra_Nome, squadra.Citta AS Squadra_Citta, GROUP_CONCAT(sponsor.Nome SEPARATOR ', ') AS Sponsor_Nomi, SUM(contratto.Cifra) AS Cifra_Totale
+// Query per recuperare le informazioni su squadre, sponsor e numero di giocatori
+$query = "SELECT squadra.Nome AS Squadra_Nome, squadra.Citta AS Squadra_Citta, GROUP_CONCAT(DISTINCT sponsor.Nome SEPARATOR ', ') AS Sponsor_Nomi, SUM(contratto.Cifra) AS Cifra_Totale, COUNT(giocatore.ID) AS Num_Giocatori
           FROM squadra
           LEFT JOIN contratto ON squadra.ID = contratto.Squadra_ID
           LEFT JOIN sponsor ON contratto.Sponsor_ID = sponsor.ID
+          LEFT JOIN giocatore ON squadra.ID = giocatore.Squadra_ID
           GROUP BY squadra.ID";
 $stmt = $pdo->query($query);
-$squadre_sponsor = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$squadre_sponsor_giocatori = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!-- Visualizzazione squadre e sponsor -->
+<!-- Visualizzazione squadre, sponsor e numero di giocatori -->
 <div class="card mb-4">
     <div class="card-header">
-        Squadre e Sponsor
+        Squadre, Sponsor
     </div>
     <div class="card-body">
         <table class="table">
@@ -201,15 +202,17 @@ $squadre_sponsor = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tr>
                     <th>Squadra</th>
                     <th>Città</th>
+                    <th>Numero di Giocatori</th>
                     <th>Sponsor</th>
                     <th>Cifra Totale</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($squadre_sponsor as $row): ?>
+                <?php foreach ($squadre_sponsor_giocatori as $row): ?>
                     <tr>
                         <td><?php echo $row['Squadra_Nome']; ?></td>
                         <td><?php echo $row['Squadra_Citta']; ?></td>
+                        <td><?php echo $row['Num_Giocatori']; ?></td>
                         <td><?php echo $row['Sponsor_Nomi']; ?></td>
                         <td><?php echo $row['Cifra_Totale']; ?></td>
                     </tr>
@@ -218,6 +221,7 @@ $squadre_sponsor = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </table>
     </div>
 </div>
+
 
         <!-- Aggiunta dati -->
         <div class="card mb-4">
