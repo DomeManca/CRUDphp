@@ -23,7 +23,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header('Location: index.php');
     } else {
         // Se si è verificato un errore, mostra un messaggio di errore
-        $error = "Registration failed";
+        echo "Registration failed";
+        sleep(5);
+        header('Location: register.php');
     }
 }
 ?>

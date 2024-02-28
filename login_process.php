@@ -25,7 +25,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header('Location: dashboard.php');
     } else {
         // Se l'utente non esiste, mostra un messaggio di errore
-        $error = "Invalid username or password";
+        echo "Invalid username or password";
+        sleep(5);
+        header('Location: index.php');
     }
 }
 ?>
